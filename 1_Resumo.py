@@ -16,7 +16,7 @@ credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict,
 
 # Autenticar no Google Sheets
 client = gspread.authorize(credentials)
-sheet = client.open("NomeDaSuaPlanilha").sheet1
+sheet = client.open("Streamlit Fit").sheet1
 
 st.write("Conexão bem-sucedida!")
 
