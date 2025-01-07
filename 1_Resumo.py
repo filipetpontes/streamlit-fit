@@ -31,7 +31,9 @@ def update_sheet(sheet, df):
 
 # Início do aplicativo Streamlit
 st.title("CRUD com Google Sheets")
-
+valor_teste = os.getenv("teste")
+            
+st.write(f"Valor: {valor_teste}")
 # Upload do arquivo JSON de credenciais
 json_keyfile = st.file_uploader("Faça upload do arquivo de credenciais JSON", type="json")
 
@@ -87,8 +89,6 @@ if json_keyfile:
                 update_sheet(sheet, df)
                 st.success("Linha excluída com sucesso!")
             
-            valor_teste = os.getenv("teste")
             
-            st.write(f"Valor: {valor_teste}")
         except Exception as e:
             st.error(f"Erro ao acessar a planilha: {e}")
