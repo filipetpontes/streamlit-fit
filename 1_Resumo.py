@@ -1,76 +1,79 @@
 import streamlit as st
+import pandas as pd
+import requests
+from io import StringIO
+import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import pandas as pd
 
-# Configuração das credenciais do Google Sheets
-def autenticar_google_sheets():
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('credenciais.json', scope)
-    client = gspread.authorize(credentials)
-    return client
+# Carregar credenciais do secrets
+credentials_dict = st.secrets["google_credentials"]
+credentials_json = json.dumps(credentials_dict)
 
-def carregar_dados(sheet):
+# Criar as credenciais
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(credentials_json), scope)
+
+# Autenticar no Google Sheets
+client = gspread.authorize(credentials)
+sheet = client.open("NomeDaSuaPlanilha").sheet1
+
+st.write(sheet)
+# Funções CRUD
+def carregar_dados():
+    """Carrega os dados da planilha."""
     data = sheet.get_all_records()
     return pd.DataFrame(data)
 
-def adicionar_linha(sheet, nova_linha):
-    sheet.append_row(nova_linha)
+def adicionar_registro(novo_registro):
+    """Adiciona um novo registro à planilha."""
+    sheet.append_row(novo_registro)
 
-def atualizar_linha(sheet, indice, dados_atualizados):
+def atualizar_registro(indice, dados_atualizados):
+    """Atualiza um registro existente na planilha."""
     for col, valor in enumerate(dados_atualizados, start=1):
-        sheet.update_cell(indice, col, valor)
+        sheet.update_cell(indice + 1, col, valor)  # +1 para compensar o cabeçalho
 
-def deletar_linha(sheet, indice):
-    sheet.delete_rows(indice)
+def deletar_registro(indice):
+    """Deleta um registro da planilha."""
+    sheet.delete_rows(indice + 1)  # +1 para compensar o cabeçalho
 
-def main():
-    st.title("CRUD com Google Sheets")
+# Interface Streamlit
+st.title("CRUD com Google Sheets")
 
-    # Autenticação no Google Sheets
-    cliente = autenticar_google_sheets()
-    planilha = cliente.open("NomeDaSuaPlanilha")
-    aba = planilha.sheet1
+# Exibir dados existentes
+st.subheader("Dados Atuais")
+dados = carregar_dados()
+st.dataframe(dados)
 
-    # Carregar os dados existentes
-    dados = carregar_dados(aba)
-    st.write("Dados Atuais:")
-    st.dataframe(dados)
+# Seção para adicionar registros
+st.subheader("Adicionar Novo Registro")
+colunas = dados.columns.tolist() if not dados.empty else ["Coluna1", "Coluna2", "Coluna3"]
+novo_registro = [st.text_input(f"Insira {col}") for col in colunas]
 
-    # CRUD
-    acao = st.sidebar.selectbox("Ação", ["Adicionar", "Atualizar", "Deletar"])
+if st.button("Adicionar"):
+    if all(novo_registro):
+        adicionar_registro(novo_registro)
+        st.success("Registro adicionado com sucesso!")
+        st.experimental_rerun()
+    else:
+        st.error("Por favor, preencha todos os campos.")
 
-    if acao == "Adicionar":
-        st.subheader("Adicionar Novo Registro")
-        colunas = dados.columns.tolist()
-        nova_linha = [st.text_input(f"{col}") for col in colunas]
-        if st.button("Adicionar"):
-            if all(nova_linha):
-                adicionar_linha(aba, nova_linha)
-                st.success("Registro adicionado com sucesso!")
-                st.experimental_rerun()
-            else:
-                st.error("Preencha todos os campos.")
+# Seção para atualizar registros
+st.subheader("Atualizar Registro")
+indice_atualizar = st.number_input("Índice do registro (começa em 0)", min_value=0, max_value=len(dados) - 1, step=1)
+if st.button("Carregar Registro para Atualizar"):
+    registro_selecionado = dados.iloc[indice_atualizar].tolist()
+    dados_atualizados = [st.text_input(f"{col}", value=str(registro_selecionado[i])) for i, col in enumerate(colunas)]
+    if st.button("Atualizar"):
+        atualizar_registro(indice_atualizar, dados_atualizados)
+        st.success("Registro atualizado com sucesso!")
+        st.experimental_rerun()
 
-    elif acao == "Atualizar":
-        st.subheader("Atualizar Registro Existente")
-        indice = st.number_input("Índice do registro (começa em 1)", min_value=1, max_value=len(dados), step=1)
-        if st.button("Carregar Registro"):
-            registro_atual = dados.iloc[indice - 1].tolist()
-            dados_atualizados = [st.text_input(f"{col}", value=str(registro_atual[i])) for i, col in enumerate(dados.columns)]
-
-            if st.button("Atualizar"):
-                atualizar_linha(aba, indice, dados_atualizados)
-                st.success("Registro atualizado com sucesso!")
-                st.experimental_rerun()
-
-    elif acao == "Deletar":
-        st.subheader("Deletar Registro")
-        indice = st.number_input("Índice do registro (começa em 1)", min_value=1, max_value=len(dados), step=1)
-        if st.button("Deletar"):
-            deletar_linha(aba, indice)
-            st.success("Registro deletado com sucesso!")
-            st.experimental_rerun()
-
-if __name__ == "__main__":
-    main()
+# Seção para deletar registros
+st.subheader("Deletar Registro")
+indice_deletar = st.number_input("Índice do registro para deletar (começa em 0)", min_value=0, max_value=len(dados) - 1, step=1)
+if st.button("Deletar"):
+    deletar_registro(indice_deletar)
+    st.success("Registro deletado com sucesso!")
+    st.experimental_rerun()
