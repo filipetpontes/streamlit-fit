@@ -1,27 +1,21 @@
 import streamlit as st
 import pandas as pd
-import requests
-from io import StringIO
-import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import os
 
 # Carregar credenciais do secrets
 credentials_dict = st.secrets["google_credentials"]
 
-st.write(f"Teste1: {credentials_dict}")
-credentials_json = json.dumps(credentials_dict)
-st.write(f"Teste2: {credentials_json}")
-# Criar as credenciais
+# Criar as credenciais diretamente do dicionário
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-credentials = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(credentials_json), scope)
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 
 # Autenticar no Google Sheets
 client = gspread.authorize(credentials)
 sheet = client.open("NomeDaSuaPlanilha").sheet1
 
-st.write(sheet)
+st.write("Conexão bem-sucedida!")
+
 # Funções CRUD
 def carregar_dados():
     """Carrega os dados da planilha."""
