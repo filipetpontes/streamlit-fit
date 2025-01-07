@@ -2,6 +2,7 @@ import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
+import os
 
 # Configuração para autenticação com o Google Sheets
 SCOPE = [
@@ -85,6 +86,8 @@ if json_keyfile:
                 df = df.drop(row_to_delete).reset_index(drop=True)
                 update_sheet(sheet, df)
                 st.success("Linha excluída com sucesso!")
-
+            
+            valor_teste = os.getenv("teste")
+            st.write(valor_teste)
         except Exception as e:
             st.error(f"Erro ao acessar a planilha: {e}")
