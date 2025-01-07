@@ -9,7 +9,7 @@ import os
 
 # Carregar credenciais do secrets
 credentials_dict = st.secrets["google_credentials"]
-testee = os.environ.get["teste"]
+testee = os.environ.get("teste")
 st.write(f"Teste: {testee}")
 credentials_json = json.dumps(credentials_dict)
 
