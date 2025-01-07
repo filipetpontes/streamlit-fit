@@ -9,10 +9,10 @@ import os
 
 # Carregar credenciais do secrets
 credentials_dict = st.secrets["google_credentials"]
-testee = st.secrets["cred_teste"]
-st.write(f"Teste: {credentials_dict}")
-credentials_json = json.dumps(credentials_dict)
 
+
+credentials_json = json.dumps(credentials_dict)
+st.write(f"Teste: {credentials_json}")
 # Criar as credenciais
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(credentials_json), scope)
