@@ -10,7 +10,7 @@ import os
 # Carregar credenciais do secrets
 credentials_dict = st.secrets["google_credentials"]
 testee = st.secrets["cred_teste"]
-st.write(f"Teste: {testee}")
+st.write(f"Teste: {credentials_dict}")
 credentials_json = json.dumps(credentials_dict)
 
 # Criar as credenciais
