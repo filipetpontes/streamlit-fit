@@ -6,7 +6,10 @@ from oauth2client.service_account import ServiceAccountCredentials
 # Carregar credenciais do secrets
 credentials_dict = st.secrets["google_credentials"]
 
-# Criar as credenciais diretamente do dicionário
+if "private_key" in credentials_dict:
+    credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
+
+# Criar as credenciais
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 
