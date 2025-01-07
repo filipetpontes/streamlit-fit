@@ -4,7 +4,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # Carregar credenciais do secrets
-credentials_dict = st.secrets["google_credentials"]
+credentials_dict = dict(st.secrets["google_credentials"])
 st.write(type(credentials_dict))
 
 if "private_key" in credentials_dict:
