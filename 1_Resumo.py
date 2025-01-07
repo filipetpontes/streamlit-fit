@@ -88,6 +88,7 @@ if json_keyfile:
                 st.success("Linha excluída com sucesso!")
             
             valor_teste = os.getenv("teste")
-            st.write(valor_teste)
+            
+            st.write(f"Valor: {valor_teste}")
         except Exception as e:
             st.error(f"Erro ao acessar a planilha: {e}")
