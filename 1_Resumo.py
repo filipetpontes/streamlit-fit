@@ -5,7 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # Carregar credenciais do secrets
 credentials_dict = st.secrets["google_credentials"]
-
+st.write(credentials_dict)
 if "private_key" in credentials_dict:
     credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
 
